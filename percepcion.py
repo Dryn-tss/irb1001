@@ -175,17 +175,22 @@ def ver(ret, img):
     return (dis, theta)
 
 
-while(True):
-	ret, img = vid.read()
+if __name__ == "__main__":
+    while(True):
+        ret, img = vid.read()
 
-	dis, theta = ver(ret, img)
-	print(f"distancia: {dis:3f}, angulo: {theta:3f}")
-	
-	# Press 'q' to exit the loop
-	if cv2.waitKey(25) & 0xFF == ord('q'):
-		vid.release()
-		cv2.destroyAllWindows()
-		exit()
+        dis, theta = ver(ret, img)
+        print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+        
+        # Press 'q' to exit the loop
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            vid.release()
+            cv2.destroyAllWindows()
+            exit()
+
+
+
+            
 
 # if __name__ == "__main__":
 #     # Infinite loop of the video

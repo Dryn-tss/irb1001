@@ -3,7 +3,7 @@ char msgEnd = ';';
 String instruccion;
 bool newMsg = false;
 
-int speed1 = 0;
+int speed = 0;
 
 void config_encoders()
 {
@@ -113,6 +113,24 @@ float controller_m1(float kp, float ki, float kd, float vel_deseada)
 }
 
 
+String readBuff() {
+  String buffArray;
+  //int i = 0;
+
+  while (Serial3.available() > 0) { //Entro a este while mientras exista algo en el puerto serial
+    char buff = Serial3.read(); //Leo el byte entrante
+    if (buff == msgEnd) {
+      newMsg = true;
+      break; //Si el byte entrante coincide con mi delimitador, me salgo del while
+    } else {
+      buffArray += buff; //Si no, agrego el byte a mi string para construir el mensaje
+      //i += 1;
+    }
+    delay(10);
+  }
+
+  return buffArray;  //Retorno el mensaje
+}
 
 
 void setup()
@@ -139,14 +157,9 @@ void loop() {
     float ki = 0.017;
     float kd = 0.0001;
 
-    //Se llama define la velocidad de acuerdo al mensaje recibido por bluetooth
-    float vel_deseada = speed1;
     
-    //Se llaman a las funciones para enviar voltaje al robot 
-    voltage_m0 = controller_m0(kp, ki, kd, vel_deseada);
-    voltage_m1 = controller_m1(kp, ki, kd, vel_deseada);
-  }
-
+    
+    
 
   
   if (Serial3.available() > 0) {
@@ -154,8 +167,19 @@ void loop() {
     //Serial.print("mensaje: ");
     Serial.println(instruccion);
     if (instruccion[0] == 'A' && newMsg) {
-      speed1 = (instruccion.substring(1)).toInt();
-      //Serial.print(speed1);
+      speed = (instruccion.substring(1)).toInt();
+      
+      voltage_m0 = controller_m0(kp, ki, kd, -speed);
+      voltage_m1 = controller_m1(kp, ki, kd, -speed);
+    }
+    else if (instruccion[0] == 'O' && newMsg) {
+      speed = (instruccion.substring(1)).toInt();
+      voltage_m0 = controller_m0(kp, ki, kd, -speed/2);
+      voltage_m1 = controller_m0(kp, ki, kd, speed/2);
+    }
+    else if(instruccion[0] == 'F' && newMsg) {
+      voltage_m0 = 0;
+      voltage_m1 = 0;
     }
   }
 
@@ -170,24 +194,7 @@ void loop() {
 
     time_ant = newtime;
 }
+}
 
     
-String readBuff() {
-  String buffArray;
-  //int i = 0;
-
-  while (Serial3.available() > 0) { //Entro a este while mientras exista algo en el puerto serial
-    char buff = Serial3.read(); //Leo el byte entrante
-    if (buff == msgEnd) {
-      newMsg = true;
-      break; //Si el byte entrante coincide con mi delimitador, me salgo del while
-    } else {
-      buffArray += buff; //Si no, agrego el byte a mi string para construir el mensaje
-      //i += 1;
-    }
-    delay(10);
-  }
-
-  return buffArray;  //Retorno el mensaje
-}
 
