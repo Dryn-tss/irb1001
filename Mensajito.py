@@ -27,7 +27,7 @@ def enviar(ser, vel:str, modo):
 	msg_e = str.encode(msg)
 	ser.write(msg_e)
 
-ser = serial.Serial("/dev/tty.IRB-G01",baudrate = 38400,timeout = 1)
+# ser = serial.Serial("/dev/tty.IRB-G01",baudrate = 38400,timeout = 1)
 time.sleep(5)
 
 # Open the video file 
@@ -42,19 +42,22 @@ while(True):
 
 	if theta > 5:
 		vel = pid(theta)
-		enviar(ser, str(vel), "orientacion")
+		# enviar(ser, str(vel), "orientacion")
+		print('hola')
 
 	if theta < 5 and dis > 30:
 		vel = pid(dis)
-		enviar(ser, str(vel), "avance")
+		# enviar(ser, str(vel), "avance")
+		print('chaooo')
 	
 	elif theta < 5 and dis < 30:
 		vel = 0
-		enviar(ser, str(vel), "parar")
+		# enviar(ser, str(vel), "parar")
+		print('noseee')
 	
 	# Press 'q' to exit the loop
 	if cv2.waitKey(25) & 0xFF == ord('q'):
 		vid.release()
 		cv2.destroyAllWindows()
-		ser.close()
+		# ser.close()
 		exit()
