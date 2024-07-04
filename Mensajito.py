@@ -1,6 +1,7 @@
 import cv2
 import time
 import serial
+import numpy as np
 from percepcion import ver
 from simple_pid import PID
 
@@ -17,47 +18,50 @@ msg_Or_leftEncode = str.encode(msg_Or_left)
 #hay que redefinir las variables para el robot 
 pid = PID(2.6,0,0, setpoint = 0)
 
-def enviar(ser, vel:str, modo):
+def enviar(ser, vel:str, modo:str):
+	vel = str(np.round(float(vel), 2))
 	if modo == "orientacion":
-		msg = "O" + vel
-	if modo == "avance":
-		msg = "A" + vel
-	else: 
-		msg = "F" + '0'
+		msg = "O" + str(vel)
+	elif modo == "avance":
+		msg = "A" + str(vel)
+	else:
+		msg = "F" + "0"	
+
+	# print(f"Enviando {msg}")
 	msg_e = str.encode(msg)
 	ser.write(msg_e)
 
-# ser = serial.Serial("/dev/tty.IRB-G01",baudrate = 38400,timeout = 1)
+ser = serial.Serial("COM5",baudrate = 38400,timeout = 1)
 time.sleep(5)
 
 # Open the video file 
-vid = cv2.VideoCapture("vid.mp4")
+vid = cv2.VideoCapture(1)
 
 while(True):
 	ret, img = vid.read()
 
 	dis, theta = ver(ret, img)
-	print(f"distancia: {dis:3f}, angulo: {theta:3f}")
-	pid(dis)
+	# print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+	print(theta)
 
-	if theta > 5:
+
+
+	#TODO
+	if np.abs(theta) > 5:
 		vel = pid(theta)
-		# enviar(ser, str(vel), "orientacion")
-		print('hola')
+		enviar(ser, str(vel), "orientacion")
 
-	if theta < 5 and dis > 30:
-		vel = pid(dis)
-		# enviar(ser, str(vel), "avance")
-		print('chaooo')
+	#if np.Abs(theta) < 5 and dis > 30:
+		#vel = pid(dis)
+		#enviar(ser, str(vel), "avance")
 	
-	elif theta < 5 and dis < 30:
-		vel = 0
-		# enviar(ser, str(vel), "parar")
-		print('noseee')
+	#elif np.Abs(theta) < 5 and dis < 30:
+		#vel = 0
+		#enviar(ser, str(vel), "parar")
 	
 	# Press 'q' to exit the loop
 	if cv2.waitKey(25) & 0xFF == ord('q'):
 		vid.release()
 		cv2.destroyAllWindows()
-		# ser.close()
+		ser.close()
 		exit()

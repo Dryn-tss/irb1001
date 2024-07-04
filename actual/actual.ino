@@ -126,7 +126,7 @@ String readBuff() {
       buffArray += buff; //Si no, agrego el byte a mi string para construir el mensaje
       //i += 1;
     }
-    delay(10);
+    delay(5);
   }
 
   return buffArray;  //Retorno el mensaje
@@ -153,47 +153,44 @@ void loop() {
 
 
     // Controlador PID valores
-    float kp = 0.2;
+    float kp = 0.05;
     float ki = 0.017;
     float kd = 0.0001;
-
     
-    
-    
-
   
-  if (Serial3.available() > 0) {
-    instruccion = readBuff(); //Leer el mensaje entrante
-    //Serial.print("mensaje: ");
-    Serial.println(instruccion);
-    if (instruccion[0] == 'A' && newMsg) {
-      speed = (instruccion.substring(1)).toInt();
+    if (Serial3.available() > 0) {
+      instruccion = readBuff(); //Leer el mensaje entrante
+      //Serial.print("mensaje: ");
+      //Serial.println(instruccion);
+      if (instruccion[0] == 'A') {
+        speed = (instruccion.substring(1)).toInt();
       
-      voltage_m0 = controller_m0(kp, ki, kd, -speed);
-      voltage_m1 = controller_m1(kp, ki, kd, -speed);
+        voltage_m0 = controller_m0(kp, ki, kd, speed);
+        voltage_m1 = controller_m1(kp, ki, kd, speed);
+      }
+      else if (instruccion[0] == 'O') {
+        speed = (instruccion.substring(1)).toInt();
+        voltage_m0 = controller_m0(kp, ki, kd, speed/2);
+        voltage_m1 = controller_m1(kp, ki, kd, -speed/2);
+      }
+      else if(instruccion[0] == 'F') {
+        voltage_m0 = 0;
+        voltage_m1 = 0;
+      }
+      Serial.println(speed);
     }
-    else if (instruccion[0] == 'O' && newMsg) {
-      speed = (instruccion.substring(1)).toInt();
-      voltage_m0 = controller_m0(kp, ki, kd, -speed/2);
-      voltage_m1 = controller_m0(kp, ki, kd, speed/2);
-    }
-    else if(instruccion[0] == 'F' && newMsg) {
-      voltage_m0 = 0;
-      voltage_m1 = 0;
-    }
-  }
 
 
   
-    //print4();
-    //print3();
+    // print4();
+    // print3();
 
 
     motor_v();
 
 
     time_ant = newtime;
-}
+  }
 }
 
     

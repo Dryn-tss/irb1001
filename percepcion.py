@@ -86,6 +86,10 @@ def angle(center_one, center_two, center_three, deg = False):
 
     cos_theta = dot_product / (magnitude_AB * magnitude_AC)
     theta = np.arccos(cos_theta)
+
+    cross_product = np.cross(AB, AC)
+    if cross_product < 0:
+        theta = -theta
     
     if deg:
         theta_degrees = np.degrees(theta)
@@ -94,13 +98,15 @@ def angle(center_one, center_two, center_three, deg = False):
 
 
 # Open the video file 
-vid = cv2.VideoCapture(PATH)
+vid = cv2.VideoCapture(1)
 
 if not vid.isOpened():
     print("Error: Could not open video.")
     exit()
 
 def ver(ret, img):
+    dis = None
+    theta = None
 
     # Flip image and Convert the frame from BGR to HSV
     img = cv2.flip(img, -1)
@@ -180,7 +186,7 @@ if __name__ == "__main__":
         ret, img = vid.read()
 
         dis, theta = ver(ret, img)
-        print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+        # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
         
         # Press 'q' to exit the loop
         if cv2.waitKey(25) & 0xFF == ord('q'):
