@@ -3,7 +3,8 @@ import numpy as np
 # from PIL import Image
 
 # VARIABLES
-PATH = 'vid.mp4'
+PATH_VID = 'vid.mp4'
+VID = True
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 # Colors
@@ -11,8 +12,8 @@ GREEN = (0, 200, 0)
 RED = (0, 0, 200)
 BLUE = (200, 0, 0)
 YELLOW = (0, 200, 200)
-PURPLE = (200, 0, 200)
-NAVY = (180,50,100)
+PURPLE = (132, 10, 132)
+NAVY = (134, 68, 68)
 
 # Range of the colors in HSV
 LOW_GREEN = np.array([40, 100, 100])
@@ -27,13 +28,12 @@ HIGH_BLUE = np.array([108, 255, 255])
 LOW_YELLOW = np.array([20, 100, 100])
 HIGH_YELLOW = np.array([30, 255, 255])
 
-#Colores para los arcos, falta modificar los rangos, aunque no estoy segura que esta sea la mejor manera de hacer lo de los arcos
-
-LOW_PURPLE = np.array([120, 100, 100])
+# Goal areas colors
+LOW_PURPLE = np.array([120, 100, 50])
 HIGH_PURPLE = np.array([160, 255, 255])
 
-LOW_NAVY = np.array([60, 100, 100])
-HIGH_NAVY = np.array([70, 255, 255])
+LOW_NAVY = np.array([80, 100, 50])
+HIGH_NAVY = np.array([120, 255, 255])
 
 # Aux. functions
 def draw_box(img, img_masked, contours, color, text):
@@ -96,13 +96,34 @@ def angle(center_one, center_two, center_three, deg = False):
         return round(theta_degrees, 2)
     return round(theta, 2)
 
+def midpoint(red_center, blue_center):
+    A = np.array([red_center[0], red_center[1]])
+    B = np.array([blue_center[0], blue_center[1]])
 
-# Open the video file 
-vid = cv2.VideoCapture(1)
+    mid = (A + B) / 2
+    return (int(mid[0]), int(mid[1]))
 
-if not vid.isOpened():
-    print("Error: Could not open video.")
-    exit()
+def draw_lines(img, red_center, blue_center, yellow_center):
+    if red_center != False and blue_center != False:
+        # draw orientation line
+        end_x = red_center[0] + ((blue_center[0] - red_center[0]) * 10)
+        end_y = red_center[1] + ((blue_center[1] - red_center[1]) * 10)
+        end_point = (end_x, end_y)
+        cv2.line(img, red_center, end_point, BLUE, thickness=1)
+
+    if red_center != False and yellow_center != False:
+        # draw ball line
+        cv2.line(img, red_center, yellow_center, RED, thickness=1)
+
+        # Adding distance (in pixels) label 
+        dis = distance(red_center, yellow_center)
+        cv2.putText(img, f"d: {dis}", (20, 300), FONT, 1, GREEN, 2, cv2.LINE_AA)
+
+    if red_center != False and blue_center != False and yellow_center != False:
+        # Adding theta (in degrees) label 
+        theta = angle(red_center, blue_center, yellow_center, True)
+        cv2.putText(img, f"theta: {theta}", (20, 330), FONT, 1, GREEN, 2, cv2.LINE_AA)
+    
 
 def ver(ret, img):
     dis = None
@@ -130,8 +151,10 @@ def ver(ret, img):
 
     img_masked = cv2.bitwise_or(img_masked_red, img_masked_blue)
     img_masked = cv2.bitwise_or(img_masked, img_masked_yellow)
-    #img_masked = cv2.bitwise_or(img_masked, img_masked_purple)
-    #img_masked = cv2.bitwise_or(img_masked, img_masked_navy)
+    img_masked = cv2.bitwise_or(img_masked, img_masked_purple)
+    img_masked = cv2.bitwise_or(img_masked, img_masked_navy)
+
+    # img_masked = cv2.bitwise_or(img_masked_purple, img_masked_navy)
 
 
     # For each mask find contours and draw the boxes 
@@ -144,55 +167,63 @@ def ver(ret, img):
     contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     yellow_center = draw_box(img, img_masked, contours, YELLOW, "Y")
 
-    #contours, _ = cv2.findContours(purple_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    #purple_center = draw_box(img, img_masked, contours, PURPLE, "P")
+    contours, _ = cv2.findContours(purple_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    purple_center = draw_box(img, img_masked, contours, PURPLE, "P")
 
-    #contours, _ = cv2.findContours(navy_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    #navy_center = draw_box(img, img_masked, contours, NAVY, "N")
+    contours, _ = cv2.findContours(navy_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    navy_center = draw_box(img, img_masked, contours, NAVY, "N")
 
     # If it detects the circles, make the lines and labels
-    if red_center != False and blue_center != False:
-        end_x = red_center[0] + ((blue_center[0] - red_center[0]) * 10)
-        end_y = red_center[1] + ((blue_center[1] - red_center[1]) * 10)
-        end_point = (end_x, end_y)
-            
-        cv2.line(img, red_center, end_point, BLUE, thickness=1)
-        cv2.line(img_masked, red_center, end_point, BLUE, thickness=1)
+    draw_lines(img, red_center, blue_center, yellow_center)
+    draw_lines(img_masked, red_center, blue_center, yellow_center)
 
-    if red_center != False and yellow_center != False:
-        cv2.line(img, red_center, yellow_center, RED, thickness=1)
-        cv2.line(img_masked, red_center, yellow_center, RED, thickness=1)
+    # draw a dot on the center of the robot
+    robot_center = midpoint(red_center, blue_center)
+    cv2.circle(img, robot_center, 2, YELLOW, thickness=2)
+    cv2.circle(img_masked, robot_center, 2, YELLOW, thickness=2)
 
-        # Adding distance (in pixels) label 
-        dis = distance(red_center, yellow_center)
-        cv2.putText(img, f"d: {dis}", (20, 300), FONT, 1, GREEN, 2, cv2.LINE_AA)
-        cv2.putText(img_masked, f"d: {dis}", (20, 300), FONT, 1, GREEN, 2, cv2.LINE_AA)
-
-    if red_center != False and blue_center != False and yellow_center != False:
-        # Adding theta (in degrees) label 
-        theta = angle(red_center, blue_center, yellow_center, True)
-        cv2.putText(img, f"theta: {theta}", (20, 330), FONT, 1, GREEN, 2, cv2.LINE_AA)
-        cv2.putText(img_masked, f"theta: {theta}", (20, 330), FONT, 1, GREEN, 2, cv2.LINE_AA)
 
     # Show the images
+    cv2.namedWindow('original', cv2.WINDOW_NORMAL)
+    cv2.moveWindow('original', 700, 10)
     cv2.imshow('original', img)
+    cv2.namedWindow('masked', cv2.WINDOW_NORMAL)
+    cv2.moveWindow('masked', 700, 400)
     cv2.imshow('masked', img_masked)
 
     return (dis, theta)
 
 
 if __name__ == "__main__":
-    while(True):
-        ret, img = vid.read()
+    if VID:
+    # Open the video file 
+        vid = cv2.VideoCapture(PATH_VID)
+    else:
+        vid = cv2.VideoCapture(1)
+        if not vid.isOpended():
+            vid = cv2.VideoCapture(0)
 
-        dis, theta = ver(ret, img)
-        # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+    if not vid.isOpened():
+        print("Error: Could not open video or camera.")
+        exit()
+
+    while(True):
+        vid.set(cv2.CAP_PROP_POS_FRAMES, 0)   # Reset the video capture to the start
         
-        # Press 'q' to exit the loop
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            vid.release()
-            cv2.destroyAllWindows()
-            exit()
+        while vid.isOpened():
+            ret, img = vid.read()
+            if not ret:
+                break
+            dis, theta = ver(ret, img)
+            # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+            
+
+            if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit the loop
+                vid.release()
+                cv2.destroyAllWindows()
+                exit()
+
+            
 
 
 
