@@ -204,10 +204,12 @@ def ver(ret, img):
 
 if __name__ == "__main__":
     if VID:
-    # Open the video file 
+        # Open the video file 
         vid = cv2.VideoCapture(PATH_VID)
-    else:
-        vid = cv2.VideoCapture(1)
+
+        if not vid.isOpended():
+            vid = cv2.VideoCapture(1)
+            
         if not vid.isOpended():
             vid = cv2.VideoCapture(0)
 
