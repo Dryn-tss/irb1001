@@ -177,10 +177,17 @@ def ver(ret, img):
     draw_lines(img, red_center, blue_center, yellow_center)
     draw_lines(img_masked, red_center, blue_center, yellow_center)
 
-    # draw a dot on the center of the robot
+    # Draw a dot on the center of the robot
     robot_center = midpoint(red_center, blue_center)
     cv2.circle(img, robot_center, 2, YELLOW, thickness=2)
     cv2.circle(img_masked, robot_center, 2, YELLOW, thickness=2)
+
+    # Obtain the center of the image
+    height, width = img.shape[:2]
+    img_center = midpoint((0, 0), (width, height))
+    cv2.circle(img, img_center, 2, PURPLE, thickness=2)
+    cv2.circle(img_masked, img_center, 2, PURPLE, thickness=2)
+
 
 
     # Show the images
