@@ -111,6 +111,10 @@ def draw_lines(img, red_center, blue_center, yellow_center):
         end_point = (end_x, end_y)
         cv2.line(img, red_center, end_point, BLUE, thickness=1)
 
+        # Draw a dot on the center of the robot
+        robot_center = midpoint(red_center, blue_center)
+        cv2.circle(img, robot_center, 2, YELLOW, thickness=2)
+
     if red_center != False and yellow_center != False:
         # draw ball line
         cv2.line(img, red_center, yellow_center, RED, thickness=1)
@@ -126,8 +130,9 @@ def draw_lines(img, red_center, blue_center, yellow_center):
     
 
 def ver(ret, img):
-    dis = None
-    theta = None
+    dis = False
+    theta = False
+    robot_center = False
 
     # Flip image and Convert the frame from BGR to HSV
     img = cv2.flip(img, -1)
@@ -177,10 +182,6 @@ def ver(ret, img):
     draw_lines(img, red_center, blue_center, yellow_center)
     draw_lines(img_masked, red_center, blue_center, yellow_center)
 
-    # Draw a dot on the center of the robot
-    robot_center = midpoint(red_center, blue_center)
-    cv2.circle(img, robot_center, 2, YELLOW, thickness=2)
-    cv2.circle(img_masked, robot_center, 2, YELLOW, thickness=2)
 
     # Obtain the center of the image
     height, width = img.shape[:2]
@@ -198,7 +199,7 @@ def ver(ret, img):
     cv2.moveWindow('masked', 700, 400)
     cv2.imshow('masked', img_masked)
 
-    return (dis, theta)
+    return (dis, theta, robot_center, img_center)
 
 
 if __name__ == "__main__":
@@ -221,7 +222,7 @@ if __name__ == "__main__":
             ret, img = vid.read()
             if not ret:
                 break
-            dis, theta = ver(ret, img)
+            dis, theta, robot_center, img_center = ver(ret, img)
             # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
             
 
