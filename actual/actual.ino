@@ -136,7 +136,7 @@ String readBuff() {
 void setup()
 {
   // Configuracion de Serial Port
-  Serial.begin(38400);    
+  Serial.begin(115200);    
   Serial3.begin(38400);       // Inicializacion del puerto serial (Monitor Serial)
   Serial.println("start");
 
@@ -150,6 +150,8 @@ void loop() {
     newtime = micros();
     act_encoder_pos();
     act_vel();
+    
+
 
 
     // Controlador PID valores
@@ -160,8 +162,8 @@ void loop() {
   
     if (Serial3.available() > 0) {
       instruccion = readBuff(); //Leer el mensaje entrante
-      //Serial.print("mensaje: ");
-      //Serial.println(instruccion);
+      Serial.print("mensaje: ");
+      Serial.println(instruccion);
       if (instruccion[0] == 'A') {
         speed = (instruccion.substring(1)).toInt();
       

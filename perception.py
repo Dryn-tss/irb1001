@@ -14,13 +14,14 @@ BLUE = (200, 0, 0)
 YELLOW = (0, 200, 200)
 PURPLE = (132, 10, 132)
 NAVY = (134, 68, 68)
+GRAY = (102, 102, 102)
 
 # Range of the colors in HSV
 LOW_GREEN = np.array([40, 100, 100])
 HIGH_GREEN = np.array([80, 255, 255])
 
-LOW_RED = np.array([0, 100, 100])
-HIGH_RED = np.array([10, 255, 255])
+LOW_RED = np.array([0, 50, 50])
+HIGH_RED = np.array([20, 255, 255])
 
 LOW_BLUE = np.array([100, 100, 100])
 HIGH_BLUE = np.array([108, 255, 255])
@@ -127,12 +128,14 @@ def draw_lines(img, red_center, blue_center, yellow_center):
         # Adding theta (in degrees) label 
         theta = angle(red_center, blue_center, yellow_center, True)
         cv2.putText(img, f"theta: {theta}", (20, 330), FONT, 1, GREEN, 2, cv2.LINE_AA)
+        return theta
+    return 0
     
 
 def ver(ret, img):
-    dis = False
-    theta = False
-    robot_center = False
+    dis = 0
+    theta = 0
+    robot_center = (0, 0)
 
     # Flip image and Convert the frame from BGR to HSV
     img = cv2.flip(img, -1)
@@ -179,7 +182,7 @@ def ver(ret, img):
     navy_center = draw_box(img, img_masked, contours, NAVY, "N")
 
     # If it detects the circles, make the lines and labels
-    draw_lines(img, red_center, blue_center, yellow_center)
+    theta = draw_lines(img, red_center, blue_center, yellow_center)
     draw_lines(img_masked, red_center, blue_center, yellow_center)
 
 
@@ -209,7 +212,7 @@ if __name__ == "__main__":
 
         if not vid.isOpended():
             vid = cv2.VideoCapture(1)
-            
+
         if not vid.isOpended():
             vid = cv2.VideoCapture(0)
 

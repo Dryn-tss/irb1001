@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from simple_pid import PID
+import time
 
 from perception import ver
 from message import open_connection, close_connection, send_msg
@@ -11,16 +12,16 @@ VID = False
 
 def setup():
     pid = PID(2.6, 0, 0, setpoint = 0)
-    channel = open_connection()
+    channel = open_connection("/dev/tty.IRB-G01")
     
     if VID:
         # Open the video file 
         vid = cv2.VideoCapture(PATH_VID)  
     else:
-        vid = cv2.VideoCapture(1)
+        vid = cv2.VideoCapture(0)
             
         if not vid.isOpened():
-            vid = cv2.VideoCapture(0)
+            vid = cv2.VideoCapture(1)
 
     if not vid.isOpened():
         print("Error: Could not open video or camera.")
@@ -35,7 +36,7 @@ def close():
     exit()
 
 def orient_to_ball(pid, channel, theta):
-    while np.abs(theta) > 5:
+    while abs(theta) > 5:
         vel = pid(theta)
         send_msg(channel, str(vel), "orientation")
 
@@ -67,8 +68,21 @@ if __name__ == "__main__":
             dis, theta, robot_center, img_center = ver(ret, img)
             # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
 
+            if abs(theta) > 5:
+                vel = pid(theta)
+                send_msg(channel, str(vel), "orientation")
+
+
+
+
+
+
+
+
+
+
             if cv2.waitKey(25) & 0xFF == ord('o'):  # Press 'o' to orient towards the ball 
-                dis, theta, robot_center, img_center = orient_to_ball(theta)
+                dis, theta, robot_center, img_center = orient_to_ball(pid, channel, theta)
 
             if cv2.waitKey(25) & 0xFF == ord('c'):  # Press 'c' to move to img_center 
                 dis, theta, robot_center, img_center = move_to_img_center()
@@ -81,13 +95,13 @@ if __name__ == "__main__":
 
 
 
-            if np.Abs(theta) < 5 and dis > 30:
-                vel = pid(dis)
-                send_msg(channel, str(vel), "advance")
+            # if abs(theta) < 5 and dis > 30:
+            #     vel = pid(dis)
+            #     send_msg(channel, str(vel), "advance")
             
-            elif np.Abs(theta) < 5 and dis < 30:
-                vel = 0
-                send_msg(channel, str(vel), "stop")
+            # elif abs(theta) < 5 and dis < 30:
+            #     vel = 0
+            #     send_msg(channel, str(vel), "stop")
 
 
             
