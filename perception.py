@@ -20,8 +20,8 @@ GRAY = (102, 102, 102)
 LOW_GREEN = np.array([40, 100, 100])
 HIGH_GREEN = np.array([80, 255, 255])
 
-LOW_RED = np.array([0, 50, 50])
-HIGH_RED = np.array([20, 255, 255])
+LOW_RED = np.array([170, 50, 150])
+HIGH_RED = np.array([180, 255, 255])
 
 LOW_BLUE = np.array([100, 100, 100])
 HIGH_BLUE = np.array([108, 255, 255])
@@ -105,6 +105,8 @@ def midpoint(red_center, blue_center):
     return (int(mid[0]), int(mid[1]))
 
 def draw_lines(img, red_center, blue_center, yellow_center):
+    info = {}
+    # With red and blue
     if red_center != False and blue_center != False:
         # draw orientation line
         end_x = red_center[0] + ((blue_center[0] - red_center[0]) * 10)
@@ -115,7 +117,9 @@ def draw_lines(img, red_center, blue_center, yellow_center):
         # Draw a dot on the center of the robot
         robot_center = midpoint(red_center, blue_center)
         cv2.circle(img, robot_center, 2, YELLOW, thickness=2)
+        info['robot_center'] = robot_center
 
+    # With red and yellow
     if red_center != False and yellow_center != False:
         # draw ball line
         cv2.line(img, red_center, yellow_center, RED, thickness=1)
@@ -123,20 +127,18 @@ def draw_lines(img, red_center, blue_center, yellow_center):
         # Adding distance (in pixels) label 
         dis = distance(red_center, yellow_center)
         cv2.putText(img, f"d: {dis}", (20, 300), FONT, 1, GREEN, 2, cv2.LINE_AA)
+        info['dis'] = dis
 
+    # With red, blue and yellow
     if red_center != False and blue_center != False and yellow_center != False:
         # Adding theta (in degrees) label 
         theta = angle(red_center, blue_center, yellow_center, True)
         cv2.putText(img, f"theta: {theta}", (20, 330), FONT, 1, GREEN, 2, cv2.LINE_AA)
-        return theta
-    return 0
-    
+        info['theta'] = theta
 
-def ver(ret, img):
-    dis = 0
-    theta = 0
-    robot_center = (0, 0)
+    return info
 
+def masks(ret, img):
     # Flip image and Convert the frame from BGR to HSV
     img = cv2.flip(img, -1)
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -181,17 +183,22 @@ def ver(ret, img):
     contours, _ = cv2.findContours(navy_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     navy_center = draw_box(img, img_masked, contours, NAVY, "N")
 
+    return (img, img_masked, red_center, blue_center, yellow_center)
+    
+
+def ver(img, img_masked, red_center, blue_center, yellow_center):
+
     # If it detects the circles, make the lines and labels
-    theta = draw_lines(img, red_center, blue_center, yellow_center)
+    info = draw_lines(img, red_center, blue_center, yellow_center)
     draw_lines(img_masked, red_center, blue_center, yellow_center)
 
 
     # Obtain the center of the image
     height, width = img.shape[:2]
     img_center = midpoint((0, 0), (width, height))
+    info["img_center"] = img_center
     cv2.circle(img, img_center, 2, PURPLE, thickness=2)
     cv2.circle(img_masked, img_center, 2, PURPLE, thickness=2)
-
 
 
     # Show the images
@@ -199,10 +206,10 @@ def ver(ret, img):
     cv2.moveWindow('original', 700, 10)
     cv2.imshow('original', img)
     cv2.namedWindow('masked', cv2.WINDOW_NORMAL)
-    cv2.moveWindow('masked', 700, 400)
+    cv2.moveWindow('masked', 50, 10)
     cv2.imshow('masked', img_masked)
 
-    return (dis, theta, robot_center, img_center)
+    return info
 
 
 if __name__ == "__main__":
@@ -210,10 +217,10 @@ if __name__ == "__main__":
         # Open the video file 
         vid = cv2.VideoCapture(PATH_VID)
 
-        if not vid.isOpended():
+        if not vid.isOpened():
             vid = cv2.VideoCapture(1)
 
-        if not vid.isOpended():
+        if not vid.isOpened():
             vid = cv2.VideoCapture(0)
 
     if not vid.isOpened():
@@ -227,8 +234,14 @@ if __name__ == "__main__":
             ret, img = vid.read()
             if not ret:
                 break
-            dis, theta, robot_center, img_center = ver(ret, img)
-            # print(f"distancia: {dis:3f}, angulo: {theta:3f}")
+
+            img, img_masked, red_center, blue_center, yellow_center = masks(ret, img)
+            info = ver(img, img_masked, red_center, blue_center, yellow_center)
+            # print(f"distancia: {info['dis']:3f}, angulo: {info['theta']:3f}")
+            if 'robot_center' in info:
+                print(True)
+            else:
+                print(False)
             
 
             if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit the loop
