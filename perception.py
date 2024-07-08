@@ -20,8 +20,11 @@ GRAY = (102, 102, 102)
 LOW_GREEN = np.array([40, 100, 100])
 HIGH_GREEN = np.array([80, 255, 255])
 
-LOW_RED = np.array([170, 50, 150])
-HIGH_RED = np.array([180, 255, 255])
+# LOW_RED = np.array([170, 50, 150])
+# HIGH_RED = np.array([180, 255, 255])
+
+LOW_RED = np.array([0, 50, 150])
+HIGH_RED = np.array([20, 255, 255])
 
 LOW_BLUE = np.array([100, 100, 100])
 HIGH_BLUE = np.array([108, 255, 255])
@@ -56,7 +59,7 @@ def draw_box(img, img_masked, contours, color, text):
         # Returns the center of the box
         center = (int(x + w / 2), int(y + h / 2))
         return center
-    return False
+    return (0, 0)
 
 def distance(center_one, center_two):
     """

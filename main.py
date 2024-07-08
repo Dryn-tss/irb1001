@@ -7,12 +7,21 @@ from perception import ver, masks
 from message import open_connection, close_connection, send_msg
 
 PATH_VID = 'vid.mp4'
-BT_PORT = "/dev/tty.IRB-G01"
 VID = False
+BT_PORT = "/dev/tty.IRB-G01"
 
+DEG_MARGIN = 5    # Probamos con 5
+DIS_MARGIN = 50
+
+KP_ANGLE = 2.6      # Probamos con solo kp = 2.6
+KI_ANGLE = 0.001  
+KD_ANGLE = 0.00001
+
+KP_DIS = 2.6      
+KI_DIS = 0.001  
+KD_DIS = 0.00001
 
 def setup():
-    pid = PID(2.6, 0, 0, setpoint = 0)
     channel = open_connection(BT_PORT)
     
     if VID:
@@ -28,7 +37,7 @@ def setup():
         print("Error: Could not open video or camera.")
         exit()
 
-    return (pid, channel, vid)
+    return (channel, vid)
 
 def close():
     vid.release()
@@ -36,51 +45,74 @@ def close():
     close_connection()
     exit()
 
+def act_info():
+    ret, img = vid.read()
+    img, img_masked, red_center, blue_center, yellow_center = masks(ret, img)
+    info = ver(img, img_masked, red_center, blue_center, yellow_center)
+    if not ret:
+        info['break'] = True
+    return info
+
 def orient_to_ball(channel, info):
-    
-    while abs(info['theta']) > 5:
+    pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
+
+    while abs(info['theta']) > DEG_MARGIN:
         vel = pid(info['theta'])
         send_msg(channel, str(vel), "orientation")
 
-
-        ret, img = vid.read()
-        if not ret:
+        info = act_info()
+        if info['break']:
             break
-        info = ver(ret, img)
+    return info
+
+def orient_to_img_center(channel, info):
+    pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
+
+    while abs(info['theta_center']) > DEG_MARGIN:
+        vel = pid(info['theta_center'])
+        send_msg(channel, str(vel), "orientation")
+
+        info = act_info
+        if info['break']:
+            break
     
     return info
 
-def move_to_img_center():
-    pass
+def move_to_img_center(channel, info):
+    pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
 
+    while info['dis_center'] > DIS_MARGIN:
 
+        info = orient_to_img_center(channel, info)
 
-def main():
+        vel = pid(info['dis_center'])
+        send_msg(channel, str(vel), "advance")
+
+        info = act_info()
+        if info['break']:
+            break
+    
+    return info
+
+    
+
+def main(ret, img, channel):
     img, img_masked, red_center, blue_center, yellow_center = masks(ret, img)
     info = ver(img, img_masked, red_center, blue_center, yellow_center)
 
 
-    if abs(info['theta']) > 5:
-        vel = pid(info['theta'])
-        send_msg(channel, str(vel), "orientation")
-
-
-
-
-
-
     if cv2.waitKey(25) & 0xFF == ord('o'):  # Press 'o' to orient towards the ball 
-        info = orient_to_ball(pid, channel, info['theta'])
+        info = orient_to_ball(channel, info)
 
     if cv2.waitKey(25) & 0xFF == ord('c'):  # Press 'c' to move to img_center 
-        info = move_to_img_center()
+        info = move_to_img_center(channel, info)
             
     if cv2.waitKey(25) & 0xFF == ord('q'):  # Press 'q' to exit 
         close()
 
 if __name__ == "__main__":
 
-    pid, channel, vid = setup()
+    channel, vid = setup()
 
     while(True):
         vid.set(cv2.CAP_PROP_POS_FRAMES, 0)   # Reset the video capture to the start
@@ -90,7 +122,7 @@ if __name__ == "__main__":
             if not ret:
                 break
             
-            main()
+            main(ret, img, channel)
 
 
 
