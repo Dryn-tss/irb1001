@@ -36,7 +36,8 @@ def close():
     close_connection()
     exit()
 
-def orient_to_ball(pid, channel, theta):
+def orient_to_ball(channel, info):
+    
     while abs(info['theta']) > 5:
         vel = pid(info['theta'])
         send_msg(channel, str(vel), "orientation")

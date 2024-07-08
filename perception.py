@@ -185,7 +185,6 @@ def masks(ret, img):
 
     return (img, img_masked, red_center, blue_center, yellow_center)
     
-
 def ver(img, img_masked, red_center, blue_center, yellow_center):
 
     # If it detects the circles, make the lines and labels
@@ -199,6 +198,12 @@ def ver(img, img_masked, red_center, blue_center, yellow_center):
     info["img_center"] = img_center
     cv2.circle(img, img_center, 2, PURPLE, thickness=2)
     cv2.circle(img_masked, img_center, 2, PURPLE, thickness=2)
+
+    theta_center = angle(red_center, blue_center, img_center)
+    info['theta_center'] = theta_center
+
+    dis_center = distance(info['robot_center'], img_center)
+    info['dis_center'] = dis_center
 
 
     # Show the images
