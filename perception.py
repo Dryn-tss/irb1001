@@ -186,9 +186,9 @@ def masks(ret, img):
     contours, _ = cv2.findContours(navy_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     navy_center = draw_box(img, img_masked, contours, NAVY, "N")
 
-    return (img, img_masked, red_center, blue_center, yellow_center)
+    return (img, img_masked, red_center, blue_center, yellow_center, (purple_center, navy_center))
     
-def ver(img, img_masked, red_center, blue_center, yellow_center):
+def ver(img, img_masked, red_center, blue_center, yellow_center, goal):
 
     # If it detects the circles, make the lines and labels
     info = draw_lines(img, red_center, blue_center, yellow_center)
@@ -217,6 +217,19 @@ def ver(img, img_masked, red_center, blue_center, yellow_center):
     cv2.moveWindow('masked', 50, 10)
     cv2.imshow('masked', img_masked)
 
+    info['goal_purple'] = goal[0]
+    info['goal_navy'] = goal[1]
+
+    theta_purple = angle(red_center, blue_center, info['goal_purple'])
+    dis_purple = distance(info['robot_center'], info['goal_purple'])
+    info['theta_purple'] = theta_purple
+    info['dis_purple'] = dis_purple
+
+    theta_navy = angle(red_center, blue_center, info['goal_navy'])
+    dis_navy = distance(info['robot_center'], info['goal_navy'])
+    info['theta_navy'] = theta_navy
+    info['dis_navy'] = dis_navy
+
     return info
 
 
@@ -243,8 +256,8 @@ if __name__ == "__main__":
             if not ret:
                 break
 
-            img, img_masked, red_center, blue_center, yellow_center = masks(ret, img)
-            info = ver(img, img_masked, red_center, blue_center, yellow_center)
+            img, img_masked, red_center, blue_center, yellow_center, goal = masks(ret, img)
+            info = ver(img, img_masked, red_center, blue_center, yellow_center, goal)
             # print(f"distancia: {info['dis']:3f}, angulo: {info['theta']:3f}")
             if 'robot_center' in info:
                 print(True)
@@ -262,24 +275,3 @@ if __name__ == "__main__":
 
 
             
-
-# if __name__ == "__main__":
-#     # Infinite loop of the video
-#     while True:  
-#         while vid.isOpened():
-
-#             if not vid:
-#                 break
-
-#             ret, img = vid.read()
-            
-#             ver(ret, img)
-
-#             # Press 'q' to exit the loop
-#             if cv2.waitKey(25) & 0xFF == ord('q'):
-#                 vid.release()
-#                 cv2.destroyAllWindows()
-#                 exit()
-
-#         Reset the video capture to the start
-#         vid.set(cv2.CAP_PROP_POS_FRAMES, 0)
