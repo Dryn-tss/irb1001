@@ -58,124 +58,12 @@ def act_info():
 def orient_to_ball(channel, info):
     pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
 
-    while abs(info['theta']) > DEG_MARGIN:
+    if abs(info['theta']) > DEG_MARGIN:
         vel = pid(info['theta'])
         send_msg(channel, str(vel), "orientation")
 
         info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
     return info
-
-def orient_to_img_center(channel, info):
-    pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
-
-    while abs(info['theta_center']) > DEG_MARGIN:
-        vel = pid(info['theta_center'])
-        send_msg(channel, str(vel), "orientation")
-
-        info = act_info
-        if 'break' in info and info['break'] == True:
-            break
-    
-    return info
-
-def orient_to_purple(channel, info):
-    pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
-
-    while abs(info['theta_purple']) > DEG_MARGIN:
-        vel = pid(info['theta_purple'])
-        send_msg(channel, str(vel), "orientation")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-    return info
-
-def orient_to_navy(channel, info):
-    pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
-
-    while abs(info['theta_navy']) > DEG_MARGIN:
-        vel = pid(info['theta_navy'])
-        send_msg(channel, str(vel), "orientation")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-    return info
-
-def move_to_img_center(channel, info):
-    pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
-
-    while info['dis_center'] > DIS_MARGIN_CENTER:
-        info = orient_to_img_center(channel, info)
-
-        vel = pid(info['dis_center'])
-        send_msg(channel, str(vel), "advance")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-    
-    return info
-
-def move_to_ball(channel, info):
-    pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
-
-    while info['dis'] > DIS_MARGIN_BALL:
-        info = orient_to_ball(channel, info)
-
-        vel = pid(info['dis'])
-        send_msg(channel, str(vel), "advance")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-    return info
-
-def move_to_purple(channel, info):
-    pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
-
-    while info['dis_purple'] > DIS_MARGIN_BALL:
-        info = orient_to_purple(channel, info)
-
-        vel = pid(info['dis_purple'])
-        send_msg(channel, str(vel), "advance")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-
-    info = orient_to_img_center(channel, info)
-    return info
-
-def move_to_navy(channel, info):
-    pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
-
-    while info['dis_navy'] > DIS_MARGIN_BALL:
-        info = orient_to_navy(channel, info)
-
-        vel = pid(info['dis_navy'])
-        send_msg(channel, str(vel), "advance")
-
-        info = act_info()
-        if 'break' in info and info['break'] == True:
-            break
-
-    info = orient_to_img_center(channel, info)
-    return info
-
-def move_between_ball_goal(channel, info):
-    while True:
-        info = move_to_ball(channel, info)
-        time.sleep(SLEEP_TIME)
-        
-        info = move_to_purple(channel, info)
-        time.sleep(SLEEP_TIME)
-
-        key = cv2.waitKey(25) & 0xFF
-        if key == ord('x'):
-            break
 
 def main(ret, img, channel):
     img, img_masked, red_center, blue_center, yellow_center, goal = masks(ret, img)

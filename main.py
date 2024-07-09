@@ -15,7 +15,7 @@ DEG_MARGIN = 5    # Probamos con 5
 DIS_MARGIN_CENTER = 50
 DIS_MARGIN_BALL = 90
 
-KP_ANGLE = 2.6      # Probamos con solo kp = 2.6
+KP_ANGLE = 2.0      # Probamos con solo kp = 2.6
 KI_ANGLE = 0.001  
 KD_ANGLE = 0.00001
 
@@ -71,17 +71,13 @@ def orient_to_ball(channel, info):
 def orient_to_img_center(channel, info):
     pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
 
-    for i in range(3):
-        while abs(info['theta_center']) > DEG_MARGIN:
-            vel = pid(info['theta_center'])
-            send_msg(channel, str(vel), "orientation")
+    while abs(info['theta_center']) > DEG_MARGIN:
+        vel = pid(info['theta_center'])
+        send_msg(channel, str(vel), "orientation")
 
-            info = act_info()
-            if 'break' in info and info['break'] == True:
-                break
-        time.sleep(0.5)
-
-    time.sleep(10)
+        info = act_info()
+        if 'break' in info and info['break'] == True:
+            break
     
     return info
 
@@ -113,11 +109,8 @@ def move_to_img_center(channel, info):
     pid = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
 
     while info['dis_center'] > DIS_MARGIN_CENTER:
-        info = orient_to_img_center(channel, info)
-        time.sleep(3)
 
         vel = pid(info['dis_center'])
-        vel = -1 * vel
         send_msg(channel, str(vel), "advance")
 
         info = act_info()
@@ -191,11 +184,11 @@ def main(ret, img, channel, move):
 
 
     if move == '1':
-        orient_to_ball(channel, info)
+        info = orient_to_ball(channel, info)
     elif move == '2':
-        orient_to_img_center(channel, info)
+        info = orient_to_img_center(channel, info)
     elif move == '3':
-        move_to_img_center(channel, info)
+        info = move_to_img_center(channel, info)
     elif move == '0':
         print(info['dis_center'])
 
