@@ -4,8 +4,8 @@ import serial
 
 cv2.namedWindow('frame')
 
-msgOn = "A100;" # Mensaje que queremos enviar para prender el LED del Arduino
-msgOff = "A0;" # Mensaje que queremos enviar para apagar el LED del Arduino
+msgOn = "F;" # Mensaje que queremos enviar para prender el LED del Arduino
+msgOff = "F;" # Mensaje que queremos enviar para apagar el LED del Arduino
 # El Ambos mensajes que estan en formato Sring deben ser transformados en un arreglo de bytes mediante la funcion .encode
 msgOnEncode = str.encode(msgOn) 
 msgOffEncode = str.encode(msgOff)

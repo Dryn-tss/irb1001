@@ -42,7 +42,6 @@ def setup():
     return (channel, vid)
 
 def close():
-    send_msg('00', 'Apagar')
     vid.release()
     cv2.destroyAllWindows()
     close_connection()
@@ -71,17 +70,13 @@ def orient_to_ball(channel, info):
 def orient_to_img_center(channel, info):
     pid = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
 
-    for i in range(3):
-        while abs(info['theta_center']) > DEG_MARGIN:
-            vel = pid(info['theta_center'])
-            send_msg(channel, str(vel), "orientation")
+    while abs(info['theta_center']) > DEG_MARGIN:
+        vel = pid(info['theta_center'])
+        send_msg(channel, str(vel), "orientation")
 
-            info = act_info()
-            if 'break' in info and info['break'] == True:
-                break
-        time.sleep(0.5)
-
-    time.sleep(10)
+        info = act_info
+        if 'break' in info and info['break'] == True:
+            break
     
     return info
 
@@ -114,10 +109,8 @@ def move_to_img_center(channel, info):
 
     while info['dis_center'] > DIS_MARGIN_CENTER:
         info = orient_to_img_center(channel, info)
-        time.sleep(3)
 
         vel = pid(info['dis_center'])
-        vel = -1 * vel
         send_msg(channel, str(vel), "advance")
 
         info = act_info()
@@ -184,50 +177,21 @@ def move_between_ball_goal(channel, info):
         if key == ord('x'):
             break
 
-def main(ret, img, channel, move):
+def main(ret, img, channel):
     img, img_masked, red_center, blue_center, yellow_center, goal = masks(ret, img)
     info = ver(img, img_masked, red_center, blue_center, yellow_center, goal)
-    
 
 
-    if move == '1':
-        orient_to_ball(channel, info)
-    elif move == '2':
-        orient_to_img_center(channel, info)
-    elif move == '3':
-        move_to_img_center(channel, info)
-    elif move == '0':
-        print(info['dis_center'])
+    orient_to_ball(channel, info)
 
 
-
-
-
-    # key = cv2.waitKey(25) & 0xFF
-
-    # if key == ord('o'):  # Press 'o' to orient towards the ball
-    #     info = orient_to_ball(channel, info)
-    
-    # elif key == ord('b'):
-    #     info = move_to_ball(channel, info)
-
-    # elif key == ord('c'):
-    #     info = orient_to_img_center(channel, info)
-
-    # elif key == ord('i'):  # Press 'c' to move to img_center
-    #     info = move_to_img_center(channel, info)
-
-    # elif key == ord('m'): 
-    #     info = move_between_ball_goal(channel, info)
-
-    # elif key == ord('q'):  # Press 'q' to exit
-    #     close()
+    key = cv2.waitKey(25) & 0xFF
+    if key == ord('q'):  # Press 'q' to exit
+        close()
 
 if __name__ == "__main__":
 
     channel, vid = setup()
-    move = input('Ingrese movimiento:   ')
-
 
     while(True):
         vid.set(cv2.CAP_PROP_POS_FRAMES, 0)   # Reset the video capture to the start
@@ -237,9 +201,8 @@ if __name__ == "__main__":
             if not ret:
                 break
             
+            main(ret, img, channel)
 
-            
-            main(ret, img, channel, move)
 
 
             

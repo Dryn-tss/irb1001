@@ -24,5 +24,5 @@ def send_msg(channel, vel:str, mode:str, print_msg=True):
 
 	msg_e = str.encode(msg)
 	channel.write(msg_e)
-	time.sleep(0.05)
+	time.sleep(0.1)
 

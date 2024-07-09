@@ -26,8 +26,11 @@ HIGH_GREEN = np.array([80, 255, 255])
 LOW_RED = np.array([0, 50, 150])
 HIGH_RED = np.array([20, 255, 255])
 
-LOW_BLUE = np.array([100, 100, 100])
-HIGH_BLUE = np.array([108, 255, 255])
+# LOW_BLUE = np.array([100, 100, 100])
+# HIGH_BLUE = np.array([108, 255, 255])
+
+LOW_BLUE = np.array([80, 100, 50])
+HIGH_BLUE = np.array([120, 255, 255])
 
 LOW_YELLOW = np.array([20, 100, 100])
 HIGH_YELLOW = np.array([30, 255, 255])
@@ -89,7 +92,7 @@ def angle(center_one, center_two, center_three, deg = False):
     magnitude_AC = np.linalg.norm(AC)
 
     cos_theta = dot_product / (magnitude_AB * magnitude_AC)
-    theta = np.arccos(cos_theta)
+    theta = np.arccos(round(cos_theta, 2))
 
     cross_product = np.cross(AB, AC)
     if cross_product < 0:
@@ -202,7 +205,7 @@ def ver(img, img_masked, red_center, blue_center, yellow_center, goal):
     cv2.circle(img, img_center, 2, PURPLE, thickness=2)
     cv2.circle(img_masked, img_center, 2, PURPLE, thickness=2)
 
-    theta_center = angle(red_center, blue_center, img_center)
+    theta_center = angle(red_center, blue_center, img_center, deg=True)
     info['theta_center'] = theta_center
 
     dis_center = distance(info['robot_center'], img_center)
