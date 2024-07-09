@@ -74,10 +74,11 @@ def main(ret, img, channel):
     pid_theta = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
     pid_dis = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
 
-    if abs(info['theta_center']) > DEG_MARGIN:
-        orient_to_center(channel, info, pid_theta)
-    else:
-        move_to_img_center(channel, info, pid_dis)
+    if info['dis_center'] > DIS_MARGIN_CENTER:
+        if abs(info['theta_center']) > DEG_MARGIN:
+            orient_to_center(channel, info, pid_theta)
+        else:
+            move_to_img_center(channel, info, pid_dis)
 
     key = cv2.waitKey(25) & 0xFF
     if key == ord('q'):  # Press 'q' to exit
