@@ -13,7 +13,7 @@ SLEEP_TIME = 1
 
 DEG_MARGIN = 5    # Probamos con 5
 DIS_MARGIN_CENTER = 90
-DIS_MARGIN_BALL = 90
+DIS_MARGIN_BALL = 140
 
 KP_ANGLE = 2.6      # Probamos con solo kp = 2.6
 KI_ANGLE = 0.01  
@@ -56,11 +56,11 @@ def act_info():
         info['break'] = True
     return info
 
-def orient_to_center(channel, info, pid):
-    vel = pid(info['theta_center'])
+def orient_to_ball(channel, info, pid):
+    vel = pid(info['theta'])
     send_msg(channel, str(2*vel), "orientation")
 
-def move_to_img_center(channel, info, pid):
+def move_to_img_ball(channel, info, pid):
     if info['dis_center'] > DIS_MARGIN_CENTER:
         vel = pid(info['dis_center'])
         send_msg(channel, str(vel / 5), "advance")
@@ -72,12 +72,12 @@ def main(ret, img, channel):
     pid_theta = PID(KP_ANGLE, KI_ANGLE, KD_ANGLE, setpoint = 0)
     pid_dis = PID(KP_DIS, KI_DIS, KD_DIS, setpoint = 0)
 
-    if info['dis_center'] > DIS_MARGIN_CENTER:
-        if abs(info['theta_center']) > DEG_MARGIN:
-            orient_to_center(channel, info, pid_theta)
+    if info['dis'] > DIS_MARGIN_BALL:
+        if abs(info['theta']) > DEG_MARGIN:
+            orient_to_ball(channel, info, pid_theta)
             print('orienting')
         else:
-            move_to_img_center(channel, info, pid_dis)
+            move_to_img_ball(channel, info, pid_dis)
 
     key = cv2.waitKey(25) & 0xFF
     if key == ord('q'):  # Press 'q' to exit

@@ -15,7 +15,7 @@ def send_msg(channel, vel:str, mode:str, print_msg=True):
 	if mode == "orientation":
 		msg = "O" + vel
 	elif mode == "advance":
-		msg = "A" + '-' + vel
+		msg = "A" + vel
 	else:
 		msg = "F" + "0"	
 

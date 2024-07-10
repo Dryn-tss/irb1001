@@ -26,11 +26,11 @@ HIGH_GREEN = np.array([80, 255, 255])
 LOW_RED = np.array([0, 50, 150])
 HIGH_RED = np.array([20, 255, 255])
 
-# LOW_BLUE = np.array([100, 100, 100])
-# HIGH_BLUE = np.array([108, 255, 255])
+LOW_BLUE = np.array([100, 100, 100])
+HIGH_BLUE = np.array([108, 255, 255])
 
-LOW_BLUE = np.array([80, 100, 50])
-HIGH_BLUE = np.array([120, 255, 255])
+# LOW_BLUE = np.array([80, 100, 50])
+# HIGH_BLUE = np.array([120, 255, 255])
 
 LOW_YELLOW = np.array([20, 100, 100])
 HIGH_YELLOW = np.array([30, 255, 255])
