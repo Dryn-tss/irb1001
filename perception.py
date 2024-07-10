@@ -271,15 +271,9 @@ def ver(img, img_masked, red_center, blue_center, yellow_center, goal):
 
 
 if __name__ == "__main__":
-    if VID:
-        # Open the video file 
-        vid = cv2.VideoCapture(PATH_VID)
+    
+    vid = cv2.VideoCapture(0)
 
-        if not vid.isOpened():
-            vid = cv2.VideoCapture(1)
-
-        if not vid.isOpened():
-            vid = cv2.VideoCapture(0)
 
     if not vid.isOpened():
         print("Error: Could not open video or camera.")
