@@ -110,6 +110,32 @@ def midpoint(red_center, blue_center):
     mid = (A + B) / 2
     return (int(mid[0]), int(mid[1]))
 
+def project_point_behind(A, B, distance):
+    """
+    Projects a point C on the line extending from A in the direction opposite to B.
+    
+    Args:
+    A (tuple): The coordinates of point A (x1, y1).
+    B (tuple): The coordinates of point B (x2, y2).
+    distance (float): The distance to move from point A in the opposite direction of B.
+    
+    Returns:
+    tuple: The coordinates of point C.
+    """
+    A = np.array(A)
+    B = np.array(B)
+    
+    # Calculate vector AB
+    AB = B - A
+    
+    # Normalize the vector to get the direction
+    AB_normalized = AB / np.linalg.norm(AB)
+    
+    # Calculate the new point C in the opposite direction
+    C = A - distance * AB_normalized
+    
+    return tuple(C)
+
 def draw_lines(img, red_center, blue_center, yellow_center):
     info = {}
     # With red and blue
@@ -232,6 +258,14 @@ def ver(img, img_masked, red_center, blue_center, yellow_center, goal):
     dis_navy = distance(info['robot_center'], info['goal_navy'])
     info['theta_navy'] = theta_navy
     info['dis_navy'] = dis_navy
+
+    # PURPLE GOAL
+    set_point = project_point_behind(yellow_center, info['goal_purple'], 100)
+    theta_set_point = angle(red_center, blue_center, set_point)
+    dis_set_point = distance(info['robot_center'], set_point)
+    info['set_point'] = set_point   
+    info['theta_set_point'] = theta_set_point   
+    info['dis_set_point'] = dis_set_point   
 
     return info
 
