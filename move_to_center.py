@@ -6,22 +6,10 @@ import time
 from perception import ver, masks
 from message import open_connection, close_connection, send_msg
 
-PATH_VID = 'vid.mp4'
-VID = False
-BT_PORT = "/dev/tty.IRB-G01"
-SLEEP_TIME = 1
-
-DEG_MARGIN = 5    # Probamos con 5
-DIS_MARGIN_CENTER = 90
-DIS_MARGIN_BALL = 90
-
-KP_ANGLE = 2.6      # Probamos con solo kp = 2.6
-KI_ANGLE = 0.01  
-KD_ANGLE = 0.00001
-
-KP_DIS = 1.6      
-KI_DIS = 0.1  
-KD_DIS = 0.01
+from var import PATH_VID, VID, BT_PORT, SLEEP_TIME
+from var import DEG_MARGIN, DIS_MARGIN_CENTER, DIS_MARGIN_BALL
+from var import KP_ANGLE, KI_ANGLE, KD_ANGLE 
+from var import KP_DIS, KI_DIS, KD_DIS 
 
 def setup():
     channel = open_connection(BT_PORT)

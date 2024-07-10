@@ -6,22 +6,10 @@ import time
 from perception import ver, masks
 from message import open_connection, close_connection, send_msg
 
-PATH_VID = 'vid.mp4'
-VID = False
-BT_PORT = "/dev/tty.IRB-G01"
-SLEEP_TIME = 1
-
-DEG_MARGIN = 5    # Probamos con 5
-DIS_MARGIN_CENTER = 90
-DIS_MARGIN_BALL = 140
-
-KP_ANGLE = 2.6      # Probamos con solo kp = 2.6
-KI_ANGLE = 0.01  
-KD_ANGLE = 0.00001
-
-KP_DIS = 1.6      
-KI_DIS = 0.1  
-KD_DIS = 0.01
+from var import PATH_VID, VID, BT_PORT, SLEEP_TIME
+from var import DEG_MARGIN, DIS_MARGIN_CENTER, DIS_MARGIN_BALL
+from var import KP_ANGLE, KI_ANGLE, KD_ANGLE 
+from var import KP_DIS, KI_DIS, KD_DIS 
 
 def setup():
     channel = open_connection(BT_PORT)
@@ -60,9 +48,9 @@ def orient_to_ball(channel, info, pid):
     vel = pid(info['theta'])
     send_msg(channel, str(2*vel), "orientation")
 
-def move_to_img_ball(channel, info, pid):
-    if info['dis_center'] > DIS_MARGIN_CENTER:
-        vel = pid(info['dis_center'])
+def move_to_ball(channel, info, pid):
+    if info['dis'] > DIS_MARGIN_BALL:
+        vel = pid(info['dis'])
         send_msg(channel, str(vel / 5), "advance")
 
 def main(ret, img, channel):
@@ -77,7 +65,7 @@ def main(ret, img, channel):
             orient_to_ball(channel, info, pid_theta)
             print('orienting')
         else:
-            move_to_img_ball(channel, info, pid_dis)
+            move_to_ball(channel, info, pid_dis)
 
     key = cv2.waitKey(25) & 0xFF
     if key == ord('q'):  # Press 'q' to exit
